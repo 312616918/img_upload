@@ -5,6 +5,7 @@ var multer = require('multer');
 var JSZip = require("jszip");
 var fs = require("fs");
 
+fs.mkdirSync(__dirname+"/../public/download/",{recursive:true});
 var upload = multer()
 
 var db = require("./../db");

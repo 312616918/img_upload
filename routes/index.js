@@ -4,6 +4,10 @@ var router = express.Router();
 var multer = require('multer');
 var fs = require('fs');
 var uuid = require('node-uuid');
+var fs = require('fs');
+
+fs.mkdirSync(__dirname+"/../upload_tmp/",{recursive:true});
+fs.mkdirSync(__dirname+"/../data/image",{recursive:true});
 
 var upload = multer({
     dest: 'upload_tmp/'
