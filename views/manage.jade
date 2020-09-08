@@ -1,0 +1,49 @@
+extends layout
+
+block content
+    .layui-container
+        .layui-row
+            .layui-col-xs12.layui-col-md6.layui-bg-red
+                form.layui-form(action='/manage/addTask', method='post')
+                    .layui-form-item
+                        label.layui-form-label 名称：
+                        .layui-input-block
+                            input.layui-input(type="text" name="name" required    lay-verify="required" placeholder="青年大学习" autocomplete="off")
+                    .layui-form-item
+                        label.layui-form-label 开始时间：
+                        .layui-input-block
+                            input(type='date', name='start-time')
+                    .layui-form-item
+                        label.layui-form-label 结束时间：
+                        .layui-input-block
+                            input(type='date', name='end-time')
+                    .layui-form-item
+                        .layui-input-block
+                            button.layui-btn 提交
+            .layui-col-xs12.layui-col-md6.layui-bg-red
+                table.layui-table
+                    thead
+                        tr
+                        th 名称
+                        th 开始时间
+                        th 结束时间
+                        th 操作
+                    tbody
+                    - for (var i in taskList)
+                        tr
+                        td= taskList[i].name
+                        td.time= taskList[i].startTime
+                        td.time= taskList[i].endTime
+                        td
+                            a(href="/manage/delete?uid=#{taskList[i].uid}") 删除
+    script.
+        $(()=>{
+            $(".time").each(function(){
+                console.log($(this).text())
+                $(this).text(new Date(parseInt($(this).text())).toLocaleString())
+            })
+            //- console.log($(".time").text())
+        })
+
+
+                            

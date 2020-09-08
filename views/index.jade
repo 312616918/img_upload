@@ -1,0 +1,42 @@
+extends layout
+
+block content
+  .layui-container
+    .layui-row
+      .layui-col-xs12.layui-col-md6
+        br
+        h1 #{classId}班青年大学习截图收集——#{task.name}
+        br
+        hr.layui-bg-red
+        .layui-elem-quote 
+          p 如果这不是你的班级，可以尝试修改地址栏中的#{classId}
+          p 或者，
+            a(href="/" style="color:#FF5722") 返回主页
+        br
+        hr.layui-bg-red
+    .layui-row
+      .layui-col-xs12.layui-col-md6
+        form.layui-form(action='/upload', method='post', enctype='multipart/form-data')
+          input(type='hidden',name="classId" value=classId)
+          .layui-form-item
+            label.layui-form-label 姓名：
+            .layui-input-block
+              input.layui-input(type="text" name="name" required  lay-verify="required" placeholder="务必输入真实姓名" autocomplete="off")
+          .layui-form-item
+            label.layui-form-label 信息界面：
+            .layui-input-block
+              input(type='file', name='info-img' required  lay-verify="required")
+          .layui-form-item
+            label.layui-form-label 完成界面：
+            .layui-input-block
+              input(type='file', name='finish-img' required  lay-verify="required")
+          .layui-form-item
+            .layui-input-block
+              button.layui-btn提交
+  //- script.
+  //-   layui.use('form', function(){
+  //-   var form = layui.form;
+    
+  //-   //各种基于事件的操作，下面会有进一步介绍
+  //-   });
+

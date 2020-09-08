@@ -1,0 +1,28 @@
+extends layout
+
+block content
+    .layui-container
+        .layui-row
+            .layui-col-xs12.layui-col-md12
+            br
+            h1 一个么得感情的收截图网站(╯‵□′)╯︵┻━┻
+            br
+            hr.layui-bg-red
+            .layui-elem-quote 专为青年大学习准备的网站，匆匆忙忙写好，不出意外的话，bug应该比功能多 :)
+            br
+            hr.layui-bg-red
+        .layui-row
+            .layui-col-xs12.layui-col-md12
+            br
+            h2 使用网站的小白鼠们：
+            br
+        .layui-row.layui-col-space15(style="padding: 20px; background-color: #F2F2F2;")
+            - for(var i in classList)
+                .layui-col-xs6.layui-col-md3
+                    .layui-card
+                        .layui-card-header #{classList[i]}班
+                        .layui-card-body
+                            a.layui-btn(href="/classId/#{classList[i]}") 上传页面
+                            &nbsp;
+                            a.layui-btn(href="/info/classId/#{classList[i]}") 查看页面
+                            

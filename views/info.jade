@@ -1,0 +1,53 @@
+extends layout
+
+block content
+    .layui-container
+        .layui-row
+            .layui-col-xs12.layui-col-md12
+                br
+                h1 #{classId}班青年大学习截图收集情况——#{task.name}
+                br
+                hr.layui-bg-red
+                .layui-elem-quote
+                    p 如果这不是你的班级，可以尝试修改地址栏中的#{classId}
+                    p 或者，
+                        a(href="/" style="color:#FF5722") 返回主页
+                    br
+                    p 下面是上传成功的记录，如果没有找到自己的记录。。额。。那大概率是网站的bug。(⊙﹏⊙)
+                    p 并且，因为某同学已经拖延症晚期，懒得调时区，所以，时间一栏可能有十几个小时的时差 :)
+
+                br
+                hr.layui-bg-red
+            .layui-col-xs12.layui-col-md6
+                table.layui-table
+                    thead
+                        tr
+                        th 序号
+                        th 姓名
+                        th 标签
+                        th 上传时间
+                    tbody
+                    - for (var i in infoList)
+                        tr
+                        td=i
+                        td= infoList[i].name
+                        //- td= infoList[i].label
+                        if infoList[i].label == "info-img"
+                            td 信息界面
+                        else
+                            td 完成界面
+                        td.time= infoList[i].timestamp
+                a.layui-btn(href="./../download/classId/#{classId}") 打包下载
+
+                
+    script.
+        $(()=>{
+            $(".time").each(function(){
+                //- console.log($(this).text())
+                $(this).text(new Date(parseInt($(this).text())).toLocaleString())
+            })
+            //- console.log($(".time").text())
+        })
+
+
+                            
