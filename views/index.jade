@@ -3,7 +3,7 @@ extends layout
 block content
   .layui-container
     .layui-row
-      .layui-col-xs12.layui-col-md6
+      .layui-col-xs12.layui-col-md12
         br
         h1 #{classId}班青年大学习截图收集——#{task.name}
         br
@@ -14,7 +14,7 @@ block content
             a(href="/" style="color:#FF5722") 返回主页
         br
         hr.layui-bg-red
-    .layui-row
+    .layui-row.layui-col-space16 
       .layui-col-xs12.layui-col-md6
         form.layui-form(action='/upload', method='post', enctype='multipart/form-data')
           input(type='hidden',name="classId" value=classId)
@@ -32,7 +32,21 @@ block content
               input(type='file', name='finish-img' required  lay-verify="required")
           .layui-form-item
             .layui-input-block
-              button.layui-btn提交
+              button.layui-btn 提交
+      .layui-col-xs12.layui-col-md6
+        fieldset.layui-elem-field
+          legend 关于提交后网页没有反应的说明
+          .layui-field-box
+            p 部分同学反应，点击提交后网页没有反应
+            br
+            p emmm 好吧，这个现象确实存在
+            br
+            p 因为服务器在国外，截图上传一般要3-5秒，在此期间，网页不会任何反馈
+            br
+            p 所以耐心等待即可，上传成功后会自动跳转
+            br
+            p 这个bug会在不久的将来修复，具体时间看心情 (′▽`〃)
+
   //- script.
   //-   layui.use('form', function(){
   //-   var form = layui.form;
