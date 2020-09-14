@@ -4,6 +4,7 @@ var router = express.Router();
 var multer = require('multer');
 var JSZip = require("jszip");
 var fs = require("fs");
+var _ = require('lodash');
 
 fs.mkdirSync(__dirname+"/../public/download/",{recursive:true});
 var upload = multer()
@@ -20,12 +21,23 @@ router.get('/classid/:classId', function (req, res, next) {
         return s.timestamp > lastTask.startTime && s.timestamp < lastTask.endTime;
     }).value();
 
-    console.log(infoList);
+    var absList=[];
+    var memberList=db.get("member."+classId).value();
+    if(memberList){
+        for(let i in memberList){
+            if(_.findIndex(infoList,(s)=>{
+                return s.name==memberList[i]
+            })==-1){
+                absList.push(memberList[i]);
+            }
+        }
+    }
 
     res.render('info', {
         title: '收截图~~',
         classId:classId,
         infoList: infoList,
+        absList:absList,
         task:lastTask
     });
 });
@@ -33,6 +45,22 @@ router.get('/classid/:classId', function (req, res, next) {
 router.get('/download/classid/:classId', function (req, res, next) {
 
     var classId = req.params.classId;
+    var newUploadKey="newUpload."+classId;
+
+    if(!db.has(newUploadKey).value()){
+        db.set(newUploadKey,true).write();
+    }
+    
+    var newUpload=db.get(newUploadKey);
+    if(!newUpload){
+        var fileName=classId+" "+lastTask.name+".zip";
+        res.redirect("/download/"+fileName);
+        return;
+    }
+
+
+
+
     var lastTask = db.get("task").last().value();
 
     var infoList = db.get("images." + classId).filter(function (s) {
@@ -68,6 +96,7 @@ router.get('/download/classid/:classId', function (req, res, next) {
         // console.log(infoList);
         var fileName=classId+" "+lastTask.name+".zip";
         fs.writeFileSync(__dirname+"/../public/download/"+fileName, content); //将打包的内容写入 当前目录下的 result.zip中
+        db.set(newUploadKey,false).write();
         res.redirect("/download/"+fileName);
     });
 

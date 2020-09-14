@@ -36,6 +36,20 @@ block content
                         td.time= taskList[i].endTime
                         td
                             a(href="/manage/delete?uid=#{taskList[i].uid}") 删除
+        .layui-row
+            .layui-col-xs12.layui-col-md6.layui-bg-red
+                h2 班级成员配置
+        .layui-row
+            .layui-col-xs12.layui-col-md6.layui-bg-red
+                form.layui-form(action='/manage/uplaodMember', method='post')
+                    .layui-form-item
+                        label.layui-form-label JSON数据：
+                        .layui-input-block
+                            textarea.layui-textarea( name="data" required    lay-verify="required")
+                    .layui-form-item
+                        .layui-input-block
+                            button.layui-btn 提交
+
     script.
         $(()=>{
             $(".time").each(function(){

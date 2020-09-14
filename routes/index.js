@@ -70,7 +70,7 @@ router.post('/upload', upload.any(), function (req, res, next) {
         return;
     }
 
-    db.set("timeRecord."+classId+".update",new Date().getTime()).write();
+    db.set("newUpload."+classId,true).write();
 
     for (var i in req.files) {
 

@@ -18,7 +18,9 @@ block content
 
                 br
                 hr.layui-bg-red
+        .layui-row.layui-col-space16 
             .layui-col-xs12.layui-col-md6
+                h2 已上交的截图
                 table.layui-table
                     thead
                         tr
@@ -38,6 +40,18 @@ block content
                             td 完成界面
                         td.time= infoList[i].timestamp
                 a.layui-btn(href="./../download/classId/#{classId}") 打包下载
+            .layui-col-xs12.layui-col-md6
+                h2 未上交的同学
+                table.layui-table
+                    thead
+                        tr
+                        th(style="width:80px") 序号
+                        th 姓名
+                    tbody
+                    - for (var i in absList)
+                        tr
+                        td=i
+                        td= absList[i]
 
                 
     script.

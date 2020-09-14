@@ -11,7 +11,8 @@ const db = low(adapter)
 db.defaults({
     images: {},
     task:[],
-    timeRecord:{}
+    timeRecord:{},
+    newUpload:{}
 })
 .write()
 
