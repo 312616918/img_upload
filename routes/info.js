@@ -5,12 +5,17 @@ var multer = require('multer');
 var JSZip = require("jszip");
 var fs = require("fs");
 var _ = require('lodash');
+var xlsx = require('node-xlsx');
 
-fs.mkdirSync(__dirname+"/../public/download/",{recursive:true});
+fs.mkdirSync(__dirname + "/../public/download/", {
+    recursive: true
+});
 var upload = multer()
 
 var db = require("./../db");
-const { getUnpackedSettings } = require('http2');
+const {
+    getUnpackedSettings
+} = require('http2');
 
 router.get('/classid/:classId', function (req, res, next) {
 
@@ -21,13 +26,13 @@ router.get('/classid/:classId', function (req, res, next) {
         return s.timestamp > lastTask.startTime && s.timestamp < lastTask.endTime;
     }).value();
 
-    var absList=[];
-    var memberList=db.get("member."+classId).value();
-    if(memberList){
-        for(let i in memberList){
-            if(_.findIndex(infoList,(s)=>{
-                return s.name==memberList[i]
-            })==-1){
+    var absList = [];
+    var memberList = db.get("member." + classId).value();
+    if (memberList) {
+        for (let i in memberList) {
+            if (_.findIndex(infoList, (s) => {
+                    return s.name == memberList[i]
+                }) == -1) {
                 absList.push(memberList[i]);
             }
         }
@@ -35,26 +40,26 @@ router.get('/classid/:classId', function (req, res, next) {
 
     res.render('info', {
         title: '收截图~~',
-        classId:classId,
+        classId: classId,
         infoList: infoList,
-        absList:absList,
-        task:lastTask
+        absList: absList,
+        task: lastTask
     });
 });
 
 router.get('/download/classid/:classId', function (req, res, next) {
 
     var classId = req.params.classId;
-    var newUploadKey="newUpload."+classId;
+    var newUploadKey = "newUpload." + classId;
 
-    if(!db.has(newUploadKey).value()){
-        db.set(newUploadKey,true).write();
+    if (!db.has(newUploadKey).value()) {
+        db.set(newUploadKey, true).write();
     }
-    
-    var newUpload=db.get(newUploadKey);
-    if(!newUpload){
-        var fileName=classId+" "+lastTask.name+".zip";
-        res.redirect("/download/"+fileName);
+
+    var newUpload = db.get(newUploadKey);
+    if (!newUpload) {
+        var fileName = classId + " " + lastTask.name + ".zip";
+        res.redirect("/download/" + fileName);
         return;
     }
 
@@ -66,26 +71,16 @@ router.get('/download/classid/:classId', function (req, res, next) {
     var infoList = db.get("images." + classId).filter(function (s) {
         return s.timestamp > lastTask.startTime && s.timestamp < lastTask.endTime;
     }).value();
-    
+
     var zip = new JSZip();
     for (var i in infoList) {
-        var filePath=infoList[i].path;
-        var fileName=infoList[i].name+"-"+(infoList[i].label=="info-img"?"信息界面":"完成界面")+"-"+infoList[i].timestamp+filePath.substring(filePath.lastIndexOf('.'));
-        
+        var filePath = infoList[i].path;
+        var fileName = infoList[i].name + "-" + (infoList[i].label == "info-img" ? "信息界面" : "完成界面") + "-" + infoList[i].timestamp + filePath.substring(filePath.lastIndexOf('.'));
+
         zip.file(infoList[i].name + "/" + fileName, fs.readFileSync(__dirname + "/../data/image/" + infoList[i].path));
 
     }
 
-    // zip.generateNodeStream({
-    //         type: 'nodebuffer',
-    //         streamFiles: true
-    //     })
-    //     .pipe(fs.createWriteStream('out.zip'))
-    //     .on('finish', function () {
-    //         // JSZip generates a readable stream with a "end" event,
-    //         // but is piped here in a writable stream which emits a "finish" event.
-    //         console.log("out.zip written.");
-    //     });
     zip.generateAsync({ //设置压缩格式，开始打包
         type: "nodebuffer", //nodejs用
         compression: "DEFLATE", //压缩算法
@@ -94,17 +89,111 @@ router.get('/download/classid/:classId', function (req, res, next) {
         }
     }).then(function (content) {
         // console.log(infoList);
-        var fileName=classId+" "+lastTask.name+".zip";
-        fs.writeFileSync(__dirname+"/../public/download/"+fileName, content); //将打包的内容写入 当前目录下的 result.zip中
-        db.set(newUploadKey,false).write();
-        res.redirect("/download/"+fileName);
+        var fileName = classId + " " + lastTask.name + ".zip";
+        fs.writeFileSync(__dirname + "/../public/download/" + fileName, content); //将打包的内容写入 当前目录下的 result.zip中
+        db.set(newUploadKey, false).write();
+        res.redirect("/download/" + fileName);
     });
+});
+
+
+router.get('/download/classid/:classId/report', function (req, res, next) {
+
+    var classId = req.params.classId;
+
+    var lastTask = db.get("task").last().value();
+
+    var infoList = db.get("images." + classId).filter(function (s) {
+        return s.timestamp > lastTask.startTime && s.timestamp < lastTask.endTime;
+    }).value();
+
+    var memberList = db.get("member." + classId).value();
+
+    var data = [{
+        name: "sheet1",
+        data: [
+            [
+                classId + "班 " + lastTask.name
+            ],
+            [
+                "序号",
+                "姓名",
+                "是否提交"
+            ]
+        ],
+        options: {
+            '!merges': [{
+                s: {
+                    c: 0,
+                    r: 0
+                },
+                e: {
+                    c: 2,
+                    r: 0
+                }
+            }]
+        }
+    }];
+
+    var uploadAmount = 0;
+    for (let i in memberList) {
+        var row = [
+            parseInt(i) + 1,
+            memberList[i]
+        ]
+        if (_.findIndex(infoList, (s) => {
+                return s.name == memberList[i]
+            }) == -1) {
+            row.push("    ✕");
+        } else {
+            row.push("✓")
+            uploadAmount++;
+        }
+        data[0].data.push(row);
+    }
+    data[0].data.push([]);
+    data[0].data.push([
+        "团员人数：",
+        "",
+        memberList.length
+    ]);
+    data[0].data.push([
+        "上交人数：",
+        "",
+        uploadAmount
+    ])
+    data[0].data.push([
+        "未交人数：",
+        "",
+        memberList.length - uploadAmount
+    ])
+    data[0].data.push([
+        "创建时间：",
+        "",
+        new Date().toLocaleString()
+    ])
+    for(let i=0;i<4;i++){
+        data[0].options["!merges"].push({
+            s: {
+                c: 0,
+                r: memberList.length+3+i
+            },
+            e: {
+                c: 1,
+                r: memberList.length+3+i
+            }
+        })
+    }
 
 
 
+    var buffer = xlsx.build(data);
 
+    var fileName = classId + " " + lastTask.name + " 收集报表.xlsx";
 
-    // res.end("success");
+    fs.writeFileSync(__dirname + "/../public/download/" + fileName, buffer);
+    res.redirect("/download/" + fileName);
+
 });
 
 
