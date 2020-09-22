@@ -27,7 +27,16 @@ var db=require("./../db")
 //     })
 //     .write()
 
-var classIds = ["1706","1704"];
+var classIds = [];
+var member = db.get("member").value();
+for(let id in member){
+    console.log(id);
+    classIds.push(id);
+}
+classIds.reverse();
+
+
+
 for(let i in classIds){
     console.log(i);
     fs.mkdirSync(__dirname+"/../data/image/"+classIds[i],{recursive:true});
@@ -41,8 +50,7 @@ for(let i in classIds){
 router.get('/', function (req, res, next) {
     res.render('welcome', {
         title: '收截图~~',
-        classList:["1706","1704"
-        ]
+        classList:classIds
     });
 });
 
