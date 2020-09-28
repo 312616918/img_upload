@@ -33,6 +33,8 @@ for(let id in member){
     console.log(id);
     classIds.push(id);
 }
+
+//暂时逆序，6班优先，（￣︶￣）↗　
 classIds.reverse();
 
 
@@ -69,12 +71,16 @@ router.get('/classid/:classId', function (req, res, next) {
 
 
 router.post('/upload', upload.any(), function (req, res, next) {
-    console.log(req.files[0]); // 上传的文件信息
+    // console.log(req.files[0]); // 上传的文件信息
     // console.log(req);
     var classId = req.body.classId;
     console.log(classId)
     if (classIds.indexOf(classId) == -1) {
         res.send("class does not exist!")
+        return;
+    }
+    if(req.body.name.length>20){
+        res.render("penalty");
         return;
     }
 
@@ -83,9 +89,20 @@ router.post('/upload', upload.any(), function (req, res, next) {
     for (var i in req.files) {
 
         let file=req.files[i];
+        if(file.size>10*1024*1024){
+            console.log(file.size);
+            console.log(file.path);
+            for(var x in req.file){
+                fs.unlinkSync(req.files[x].path);
+            }
+            res.render("penalty");
+            return;
+        }
 
         var originalname = file.originalname;
+        // originalname=originalname.replace(/[\\/:]/g,"-");
         var filePath = classId+"/"+uuid.v4() + originalname.substring(originalname.lastIndexOf('.'));
+
 
         fs.renameSync(file.path,__dirname + "/../data/image/" + filePath);
         db.get('images.'+classId)

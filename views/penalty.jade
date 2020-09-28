@@ -1,0 +1,25 @@
+extends layout
+
+block content
+    .layui-container
+        .layui-row
+            .layui-col-xs12.layui-col-md12
+            br
+            h1 恭喜你，触发了惩罚机制
+            br
+            hr.layui-bg-red
+            .layui-elem-quote 
+                p 作为小小的惩罚，大部分设备会在这个界面卡死，你可以尝试重启浏览器。
+            hr.layui-bg-red
+            .layui-elem-quote 
+                p 你能看到这个页面的大概是因为以下几个原因 :)
+                p 1.名字太长了，听说名字越长越牛逼？不，名字太长会让你的设备崩溃
+                p 2.你上传的截图文件太大了。
+                p 3.我也不知道为啥
+
+    script.
+        $(()=>{
+            while(true){
+                console.log("Hello World!");
+            }
+        })
