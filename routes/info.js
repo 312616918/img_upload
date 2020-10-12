@@ -196,5 +196,61 @@ router.get('/download/classid/:classId/report', function (req, res, next) {
 
 });
 
+router.get('/download/classid/:classId/report2', function (req, res, next) {
+
+    var classId = req.params.classId;
+    var lastTask = db.get("task").last().value();
+    var infoList = db.get("images." + classId).filter(function (s) {
+        return s.timestamp > lastTask.startTime && s.timestamp < lastTask.endTime;
+    }).value();
+    var memberList = db.get("member." + classId).value();
+    var data = [{
+        name: "sheet1",
+        data: [
+            [
+                "班级","总人数","完成人数","未完成人数","未完成名单"
+            ]
+        ],
+        options:{
+            '!cols': [{ wch: 6 }, { wch: 7 }, { wch: 9 }, { wch: 11 },{wch:30} ]
+        }
+    }];
+
+    var namesStr="";
+    var amount = 0;
+    for (let i in memberList) {
+        if (_.findIndex(infoList, (s) => {
+                return s.name == memberList[i]
+            }) == -1) {
+            if(amount){
+                namesStr+="、"
+            }
+            namesStr+=memberList[i];
+            amount++;
+        } 
+    }
+    data[0].data.push([
+        classId,
+        memberList.length,
+        memberList.length-amount,
+        amount,
+        namesStr
+    ]);
+    for(let i=0;i<5;i++){
+        data[0].data.push([]);
+    }
+    data[0].data.push([
+        "时间：",
+        new Date().toLocaleString()
+    ])
+    var buffer = xlsx.build(data);
+
+    var fileName = classId + " " + lastTask.name + " 收集报表-新版.xlsx";
+
+    fs.writeFileSync(__dirname + "/../public/download/" + fileName, buffer);
+    res.redirect("/download/" + fileName);
+
+});
+
 
 module.exports = router;

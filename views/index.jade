@@ -30,9 +30,13 @@ block content
             label.layui-form-label 完成界面：
             .layui-input-block
               input(type='file', name='finish-img' required  lay-verify="required")
-          .layui-form-item
+          .layui-form-item#progress(hidden)
             .layui-input-block
-              button.layui-btn 提交
+              .layui-progress.layui-progress-big(lay-showPercent="true" lay-filter="demo")
+                .layui-progress-bar.layui-bg-blue(lay-percent="0%")
+          .layui-form-item#submit-btn
+            .layui-input-block
+              button.layui-btn(lay-submit) 提交
         br
         br
         br
@@ -90,10 +94,49 @@ block content
             p ——是的，我确定，但是晚上用网高峰以及人品不好的时候，网速会被拉低。
             br
 
-  //- script.
-  //-   layui.use('form', function(){
-  //-   var form = layui.form;
+  script.
+    //- layui.use('form', function(){
+    //- var form = layui.form;
     
-  //-   //各种基于事件的操作，下面会有进一步介绍
-  //-   });
+    //- //各种基于事件的操作，下面会有进一步介绍
+    //- });
+
+    var element=null;
+    layui.use('element', function(){
+      element = layui.element;
+    });
+    $('form').on('submit', function (e) {
+        e.preventDefault(); 
+        $("#submit-btn").hide();
+        $("#progress").show();
+        let fd = new FormData(this); 
+        $.ajax({
+            type: 'POST',
+            url: '/upload',
+            data: fd,
+            //- dataType:'json',
+            contentType: false,
+            processData: false, 
+            xhr: function () { 
+                let xhr = new XMLHttpRequest();
+                if (xhr.upload) {
+                  xhr.upload.addEventListener('progress', jdt, false);
+                }
+                return xhr; 
+            },
+            success: function (res) { 
+                //- console.log(res);
+                $(location).attr('href', '/info/classId/#{classId}');
+              },
+              beforesend:function(){},
+              complete:function(){},  
+        })
+    })
+    function jdt(e){
+      console.log(e);
+        //- $('progress').attr('max',e.total); 
+        //- $('progress').attr('value',e.loaded);
+        element.progress('demo', parseInt(e.loaded*100/e.total)+'%');
+
+    }
 

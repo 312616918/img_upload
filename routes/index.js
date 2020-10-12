@@ -139,7 +139,9 @@ router.post('/upload', upload.any(), function (req, res, next) {
         // })(req.files[i]);
 
     }
-    res.redirect("/info/classId/"+classId);
+
+    res.send("success");
+    // res.redirect("/info/classId/"+classId);
     // return;
 
 
