@@ -5,63 +5,37 @@ var multer = require('multer');
 var fs = require('fs');
 var uuid = require('node-uuid');
 var fs = require('fs');
-
-fs.mkdirSync(__dirname+"/../upload_tmp/",{recursive:true});
-fs.mkdirSync(__dirname+"/../data/image",{recursive:true});
+var dao=require("./../dao")
+var service=require("../service");
 
 var upload = multer({
     dest: 'upload_tmp/'
 });
 
-var db=require("./../db")
 
-// const low = require('lowdb')
-// const FileSync = require('lowdb/adapters/FileSync')
-
-// const adapter = new FileSync(__dirname + '/../data/db.json')
-// const db = low(adapter)
-
-// db.defaults({
-//         images: {},
-//         task:[]
-//     })
-//     .write()
-
-var classIds = [];
-var member = db.get("member").value();
-for(let id in member){
-    console.log(id);
-    classIds.push(id);
-}
-
-//暂时逆序，6班优先，（￣︶￣）↗　
-classIds.reverse();
-
-
-
-for(let i in classIds){
-    console.log(i);
-    fs.mkdirSync(__dirname+"/../data/image/"+classIds[i],{recursive:true});
-    if(!db.has("images."+classIds[i]).value()){
-        db.set("images."+classIds[i],[]).write();
-    }
-    // console.log(db.get("image."+classIds[i]).value());
-}
-
-/* GET home page. */
+/**
+ * 欢迎页
+ */
 router.get('/', function (req, res, next) {
     res.render('welcome', {
         title: '收截图~~',
-        classList:classIds
+        classList:dao.getClassList()
     });
 });
 
+/**
+ * 上传界面
+ */
 router.get('/classid/:classId', function (req, res, next) {
+    let classIds=dao.getClassList();
+
+    //驳回不存在的班级
     if (classIds.indexOf(req.params.classId) == -1) {
         res.send("class does not exist!")
         return;
     }
-    var lastTask = db.get("task").last().value();
+
+    var lastTask = dao.getLastTask();
     res.render('index', {
         title: '收截图~~',
         classId: req.params.classId,
@@ -69,29 +43,37 @@ router.get('/classid/:classId', function (req, res, next) {
     });
 });
 
-
+/**
+ * 上传请求
+ */
 router.post('/upload', upload.any(), function (req, res, next) {
     // console.log(req.files[0]); // 上传的文件信息
     // console.log(req);
+
+    let classIds=dao.getClassList();
+
     var classId = req.body.classId;
-    console.log(classId)
+
+
     if (classIds.indexOf(classId) == -1) {
         res.send("class does not exist!")
         return;
     }
+
+    //姓名过长
     if(req.body.name.length>20){
         res.render("penalty");
         return;
     }
 
-    db.set("newUpload."+classId,true).write();
+    dao.setNewUplaod(classId);
 
     for (var i in req.files) {
 
         let file=req.files[i];
+
+        //文件过大
         if(file.size>10*1024*1024){
-            console.log(file.size);
-            console.log(file.path);
             for(var x in req.file){
                 fs.unlinkSync(req.files[x].path);
             }
@@ -100,67 +82,23 @@ router.post('/upload', upload.any(), function (req, res, next) {
         }
 
         var originalname = file.originalname;
-        // originalname=originalname.replace(/[\\/:]/g,"-");
         var filePath = classId+"/"+uuid.v4() + originalname.substring(originalname.lastIndexOf('.'));
-
-
         fs.renameSync(file.path,__dirname + "/../data/image/" + filePath);
-        db.get('images.'+classId)
-        .push({
+
+        /**
+         * @type ImageRecord
+         */
+        let record={
             name:req.body.name,
             path:filePath,
             timestamp:new Date().getTime(),
             label:file.fieldname
-        })
-        .write()
+        };
 
-
-        // (function (file) {
-        //     var originalname = file.originalname;
-        //     var filePath = classId+"/"+uuid.v4() + originalname.substring(originalname.lastIndexOf('.'));
-        //     fs.readFile(file.path, function (err, data) {
-        //         fs.writeFile(__dirname + "/../data/image/" + filePath, data, function (err) {
-        //             if (err) {
-        //                 console.log(err);
-        //             } else {
-
-        //                 db.get('images.'+classId)
-        //                 .push({
-        //                     name:req.body.name,
-        //                     path:filePath,
-        //                     timestamp:new Date().getTime(),
-        //                     label:file.fieldname
-        //                 })
-        //                 .write()
-        //                 fs.unlinkSync(file.path);
-        //             }
-        //         });
-        //     });
-        // })(req.files[i]);
-
+        dao.addImageRocord(classId,record);
     }
 
     res.send("success");
-    // res.redirect("/info/classId/"+classId);
-    // return;
-
-
-    // var filePath=classId+uuid.v4()+req.files[0].originalname
-    // var des_file = __dirname + "/data/image/" + ;
-    // fs.readFile(req.files[0].path, function (err, data) {
-    //     fs.writeFile(des_file, data, function (err) {
-    //         if (err) {
-    //             console.log(err);
-    //         } else {
-    //             response = {
-    //                 message: 'File uploaded successfully',
-    //                 filename: req.files[0].originalname
-    //             };
-    //             console.log(response);
-    //             res.end(JSON.stringify(response));
-    //         }
-    //     });
-    // });
 });
 
 module.exports = router;

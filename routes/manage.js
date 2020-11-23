@@ -4,7 +4,9 @@ var router = express.Router();
 var multer = require('multer');
 var upload = multer()
 
-var db = require("./../db")
+var dao = require("./../dao")
+
+var db=dao.db;
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
@@ -14,8 +16,9 @@ router.get('/', function (req, res, next) {
     });
 });
 router.post('/addTask', upload.none(), function (req, res, next) {
-    console.log(req.body);
-    console.log(new Date(req.body["start-time"]))
+
+
+    //@ts-ignore
     db.get("task").push({
         uid: uuid.v4(),
         name: req.body.name,
@@ -26,8 +29,9 @@ router.post('/addTask', upload.none(), function (req, res, next) {
 });
 router.get('/delete', function (req, res, next) {
 
-    console.log(req.query);
 
+
+    //@ts-ignore
     db.get("task").remove(function (n) {
         return n.uid == req.query["uid"];
     }).write();
@@ -40,7 +44,6 @@ router.get('/delete', function (req, res, next) {
 
 router.post('/uplaodMember', upload.none(), function (req, res, next) {
     var str = req.body["data"];
-    console.log(str);
     db.set("member", JSON.parse(str)).write();
     res.end("success");
 });

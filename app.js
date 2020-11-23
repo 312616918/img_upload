@@ -10,6 +10,8 @@ var manageRouter = require('./routes/manage');
 var infoRouter = require('./routes/info');
 const { info } = require('console');
 
+var service=require("./service");
+
 var app = express();
 
 // view engine setup
@@ -43,6 +45,9 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+service.initDir();
+
+// @ts-ignore
 process.env.PORT = 4012;
 
 module.exports = app;

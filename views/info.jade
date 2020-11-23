@@ -45,7 +45,11 @@ block content
                 br
                 br
                 a.layui-btn(href="./../download/classId/#{classId}") 打包下载
+                br
+                br
                 a.layui-btn(href="./../download/classId/#{classId}/report") 报表下载
+                br
+                br
                 a.layui-btn(href="./../download/classId/#{classId}/report2") 报表下载-new
                 br
                 br
@@ -59,11 +63,13 @@ block content
                         tr
                         th(style="width:80px") 序号
                         th 姓名
+                        th 拖延次数
                     tbody
                     - for (var i in absList)
                         tr
                         td=i
-                        td= absList[i]
+                        td= absList[i].name
+                        td= absList[i].late.lateTimes +" / "+  absList[i].late.totalTimes 
 
                 
     script.
