@@ -48,6 +48,6 @@ app.use(function(err, req, res, next) {
 service.initDir();
 
 // @ts-ignore
-process.env.PORT = 4012;
+process.env.PORT = 4010;
 
 module.exports = app;
